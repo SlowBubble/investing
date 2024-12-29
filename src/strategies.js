@@ -1,4 +1,4 @@
-export function calculateMonthlyInvestment(btcPrices, startYear, startMonth) {
+export function calculateInvestment(btcPrices, startYear, startMonth, monthsInterval) {
     const monthlyInvestment = 1000;
     let totalBtc = 0;
     let totalUsdInvested = 0;
@@ -6,12 +6,13 @@ export function calculateMonthlyInvestment(btcPrices, startYear, startMonth) {
     const filteredPrices = btcPrices.filter(price => 
         (price.year > startYear) || 
         (price.year === startYear && price.month >= startMonth)
-    );
+    ).filter((price, index) => index % monthsInterval === 0);
     
     return filteredPrices.map(priceData => {
-        const btcBought = monthlyInvestment / priceData.price;
+        const investment = monthlyInvestment * monthsInterval;
+        const btcBought = investment / priceData.price;
         totalBtc += btcBought;
-        totalUsdInvested += monthlyInvestment;
+        totalUsdInvested += investment;
         const totalUsd = totalBtc * priceData.price;
         
         return {

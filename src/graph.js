@@ -2,7 +2,7 @@ export function displayBTCLogGraph(ctx, priceData) {
     const labels = priceData.map(price => `${price.year}-${price.month}`);
     const prices = priceData.map(price => price.price);
 
-    new Chart(ctx, {
+    return new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,
