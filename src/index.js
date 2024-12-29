@@ -1,82 +1,51 @@
 import { btcPrices } from './price_data.js';
+import { displayBTCLogGraph, displayInvestmentGraph, displayProfitGraph } from './graph.js';
+import { calculateMonthlyInvestment } from './strategies.js';
 
-function displayBTCGraph() {
-    const ctx = document.getElementById('btcChart');
+const btcLogChart = document.getElementById('btcLogChart');
+const investmentChartEl = document.getElementById('investmentChart');
+const profitChartEl = document.getElementById('profitChart');
+let investmentChart = null;
+let profitChart = null;
+
+let currentStartYear = 2020;
+let currentStartMonth = 1;
+
+function updateInvestmentChart() {
+    if (investmentChart) {
+        investmentChart.destroy();
+        investmentChart = null;
+    }
+    if (profitChart) {
+        profitChart.destroy();
+        profitChart = null;
+    }
     
-    const labels = btcPrices.map(price => `${price.year}-${price.month}`);
-    const prices = btcPrices.map(price => price.price);
-
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Bitcoin Price (USD)',
-                data: prices,
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Price (USD)'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Date'
-                    }
-                }
-            }
-        }
-    });
+    const monthlyResults = calculateMonthlyInvestment(btcPrices, currentStartYear, currentStartMonth);
+    investmentChart = displayInvestmentGraph(investmentChartEl, monthlyResults);
+    profitChart = displayProfitGraph(profitChartEl, monthlyResults);
 }
 
-function displayBTCLogGraph() {
-    const ctx = document.getElementById('btcLogChart');
-    
-    const labels = btcPrices.map(price => `${price.year}-${price.month}`);
-    const prices = btcPrices.map(price => price.price);
+displayBTCLogGraph(btcLogChart, btcPrices);
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Bitcoin Price (USD) - Log Scale',
-                data: prices,
-                borderColor: 'rgb(192, 75, 75)',
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    type: 'logarithmic',
-                    title: {
-                        display: true,
-                        text: 'Price (USD) - Log Scale'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Date'
-                    }
-                }
-            }
-        }
-    });
-}
+document.getElementById('monthly').addEventListener('click', updateInvestmentChart);
 
-displayBTCGraph();
-displayBTCLogGraph();
+document.getElementById('decreaseDate').addEventListener('click', () => {
+    currentStartMonth -= 6;
+    while (currentStartMonth < 1) {
+        currentStartMonth += 12;
+        currentStartYear--;
+    }
+    updateInvestmentChart();
+});
+
+document.getElementById('increaseDate').addEventListener('click', () => {
+    currentStartMonth += 6;
+    while (currentStartMonth > 12) {
+        currentStartMonth -= 12;
+        currentStartYear++;
+    }
+    updateInvestmentChart();
+});
 
 
